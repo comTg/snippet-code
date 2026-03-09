@@ -1,0 +1,325 @@
+<!-- BlueberryAI - White Paper (Gate Form Modal) -->
+<div id="bbai-hs-modal-scope">
+  <button type="button" class="bbai-cta-btn" id="bbaiOpenModalBtn">
+    McKinsey Automotive Industry White Paper Compendium
+  </button>
+
+  <!-- Modal -->
+  <div class="bbai-modal" id="bbaiHsModal" aria-hidden="true">
+    <div class="bbai-backdrop" data-bbai-close="1"></div>
+
+    <div class="bbai-dialog" role="dialog" aria-modal="true" aria-labelledby="bbaiModalTitle">
+      <button class="bbai-close" type="button" aria-label="Close" data-bbai-close="1">×</button>
+
+      <div class="bbai-card">
+        <h3 class="bbai-title" id="bbaiModalTitle">Download For Free</h3>
+        <p class="bbai-subtitle">Please provide your details to download</p>
+
+        <div class="bbai-form-wrap">
+          <div id="bbaiHubspotForm"></div>
+
+          <div class="bbai-loading" id="bbaiFormLoading"></div>
+          <div class="bbai-error" id="bbaiFormError" style="display:none;">
+            Form failed to load. Please refresh and try again.
+          </div>
+
+          <div class="bbai-success" id="bbaiFormSuccess" style="display:none;">
+            Thanks! Your download should start automatically. If it doesn’t, please click
+            <a href="#" id="bbaiManualDownloadLink">here</a>.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Scope everything to avoid leaking styles */
+  #bbai-hs-modal-scope {
+    width: 100%;
+    display: flex;
+    justify-content: center; /* change to flex-start if you want left aligned */
+    align-items: center;
+  }
+
+  /* Button style aligned to your existing theme */
+  #bbai-hs-modal-scope .bbai-cta-btn{
+    color: var(--primaryButtonTextColor);
+    background-color: var(--primaryButtonBackgroundColor);
+    border-color: var(--primaryButtonTextColor);
+    border: none;
+    padding: 12px 28px;
+    font-size: 16px;
+    border-radius: 300px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    /* box-shadow: 0 8px 24px rgba(89, 104, 252, 0.35); */
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    letter-spacing: -0.01em;
+  }
+  #bbai-hs-modal-scope .bbai-cta-btn:hover{
+    background-color: #4c59d4;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(89, 104, 252, 0.40);
+  }
+
+  /* Modal base */
+  #bbai-hs-modal-scope .bbai-modal{
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: none; /* closed by default */
+  }
+  #bbai-hs-modal-scope .bbai-modal.is-open{ display: block; }
+
+  #bbai-hs-modal-scope .bbai-backdrop{
+    position: absolute;
+    inset: 0;
+    background: rgba(11, 14, 20, 0.70);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  /* Dialog container */
+  #bbai-hs-modal-scope .bbai-dialog{
+    position: relative;
+    width: min(600px, calc(100vw - 32px));
+    margin: 78px auto 8vh auto;
+    z-index: 1;
+  }
+
+  /* Card style similar to your gateCard */
+  #bbai-hs-modal-scope .bbai-card{
+    background: radial-gradient(120% 120% at 100% 50%,
+      rgba(125, 136, 255, 0.16) 0%,
+      rgba(22, 27, 34, 0.98) 45%,
+      rgba(13, 17, 23, 0.98) 100%);
+    border: 1px solid rgba(129, 142, 255, 0.55);
+    box-shadow:
+      0 26px 70px rgba(0, 0, 0, 0.6),
+      0 0 0 1px rgba(129, 142, 255, 0.18),
+      0 0 24px rgba(99, 110, 255, 0.28);
+    border-radius: 20px;
+    padding: 22px 22px;
+    color: #E6EDF3;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  #bbai-hs-modal-scope .bbai-title{
+    margin: 0 0 8px 0;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #fff;
+    text-align:center;
+  }
+  #bbai-hs-modal-scope .bbai-subtitle{
+    margin: 0 0 18px 0;
+    color: #b8c1d9;
+    text-align: center;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* Close button */
+  #bbai-hs-modal-scope .bbai-close{
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid rgba(129, 142, 255, 0.25);
+    background: rgba(13, 17, 23, 0.55);
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 2;
+    transition: transform .15s ease, background-color .2s ease;
+  }
+  #bbai-hs-modal-scope .bbai-close:hover{
+    transform: scale(1.04);
+    background: rgba(13, 17, 23, 0.75);
+  }
+
+  /* Loading/Success */
+  #bbai-hs-modal-scope .bbai-loading{
+    margin-top: 12px;
+    color: #8b949e;
+    font-size: 14px;
+  }
+  #bbai-hs-modal-scope .bbai-error{
+    margin-top: 12px;
+    color: #ffb4b4;
+    font-size: 14px;
+  }
+  #bbai-hs-modal-scope .bbai-success{
+    margin-top: 12px;
+    color: #b8c1d9;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  #bbai-hs-modal-scope .bbai-success a{
+    color: #aab4ff;
+    text-decoration: underline;
+  }
+
+  /* HubSpot form dark theme overrides */
+  #bbai-hs-modal-scope .hs-form-field > label{
+    color: #E6EDF3 !important;
+    font-weight: 500 !important;
+  }
+  #bbai-hs-modal-scope .hs-input{
+    background-color: #0d1117 !important;
+    border: 1px solid #30363d !important;
+    color: #fff !important;
+    border-radius: 10px !important;
+    padding: 10px 12px !important;
+  }
+  #bbai-hs-modal-scope .hs-button{
+    background-color: #5968FC !important;
+    border-color: #5968FC !important;
+    color: #fff !important;
+    width: 100% !important;
+    margin-top: 10px !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    padding: 12px 14px !important;
+  }
+  #bbai-hs-modal-scope .hs-richtext{
+    color: #8b949e !important;
+  }
+
+  /* Mobile tweaks */
+  @media (max-width: 640px){
+    #bbai-hs-modal-scope .bbai-dialog{ margin: 6vh auto; }
+    #bbai-hs-modal-scope .bbai-card{ padding: 22px 16px; border-radius: 18px; }
+    #bbai-hs-modal-scope .bbai-title{ font-size: 22px; }
+  }
+
+  /* Scroll lock when modal open */
+  html.bbai-modal-lock, body.bbai-modal-lock{
+    overflow: hidden !important;
+  }
+</style>
+
+<script>
+(function(){
+  var modal = document.getElementById('bbaiHsModal');
+  var openBtn = document.getElementById('bbaiOpenModalBtn');
+  var loadingEl = document.getElementById('bbaiFormLoading');
+  var errorEl = document.getElementById('bbaiFormError');
+  var successEl = document.getElementById('bbaiFormSuccess');
+  var manualLink = document.getElementById('bbaiManualDownloadLink');
+
+  // ✅ 这里换成你的白皮书 PDF 链接
+  var WHITEPAPER_URL = "https://YOUR-DOMAIN.com/path/to/automotive-whitepaper.pdf";
+
+  var formTarget = '#bbaiHubspotForm';
+  var formLoaded = false;
+
+  function ensureHubspotScript(cb){
+    if (window.hbspt && window.hbspt.forms && typeof window.hbspt.forms.create === 'function') {
+      cb(); return;
+    }
+
+    if (document.querySelector('script[src*="js.hsforms.net/forms/embed/v2.js"]')) {
+      var tries = 0;
+      var t = setInterval(function(){
+        tries++;
+        if (window.hbspt && window.hbspt.forms && window.hbspt.forms.create) {
+          clearInterval(t); cb();
+        } else if (tries > 80) { // ~8s
+          clearInterval(t); showError();
+        }
+      }, 100);
+      return;
+    }
+
+    var s = document.createElement('script');
+    s.src = '//js.hsforms.net/forms/embed/v2.js';
+    s.async = true;
+    s.onload = cb;
+    s.onerror = showError;
+    document.head.appendChild(s);
+  }
+
+  function startDownload(){
+    // Some browsers require this to happen shortly after user interaction;
+    // after submit it should still be acceptable in most cases.
+    try{
+      var a = document.createElement('a');
+      a.href = WHITEPAPER_URL;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      // If same-origin and you want forced download, you can set: a.download = '';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch(e){
+      // fallback
+      window.open(WHITEPAPER_URL, '_blank', 'noopener');
+    }
+  }
+
+  function loadFormOnce(){
+    if (formLoaded) return;
+
+    loadingEl.style.display = 'block';
+    errorEl.style.display = 'none';
+    successEl.style.display = 'none';
+
+    ensureHubspotScript(function(){
+      try{
+        window.hbspt.forms.create({
+          portalId: "44361574",
+          formId: "5cbe7e53-7d7d-4736-97f3-9bcfec9de205",
+          target: formTarget,
+          onFormReady: function(){
+            loadingEl.style.display = 'none';
+            formLoaded = true;
+          },
+          onFormSubmitted: function(){
+            closeModal();
+          }
+        });
+      } catch(e){
+        showError();
+      }
+    });
+  }
+
+  function openModal(){
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden','false');
+    document.documentElement.classList.add('bbai-modal-lock');
+    document.body.classList.add('bbai-modal-lock');
+    loadFormOnce();
+  }
+
+  function closeModal(){
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden','true');
+    document.documentElement.classList.remove('bbai-modal-lock');
+    document.body.classList.remove('bbai-modal-lock');
+  }
+
+  function showError(){
+    loadingEl.style.display = 'none';
+    errorEl.style.display = 'block';
+  }
+
+  // Events
+  openBtn.addEventListener('click', openModal);
+
+  modal.addEventListener('click', function(e){
+    if (e.target && e.target.getAttribute('data-bbai-close') === '1') {
+      closeModal();
+    }
+  });
+
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+  });
+})();
+</script>

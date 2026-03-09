@@ -1,0 +1,659 @@
+<!-- 1. Base Styles -->
+<style>
+    /* Scope to wrapper to prevent leaking styles */
+    #gdc-block-wrapper {
+        position: relative;
+        width: 100%;
+        min-height: 300px;
+        overflow: hidden;
+        background-color: #0B0E14;
+    }
+
+    /* Squarespace specific override */
+    .page-section.vertical-alignment--top:not(.content-collection):not(.gallery-section):not(.user-items-list-section):not(.section-height--custom):not(.editmode-changing-rowcount)>.content-wrapper {
+        padding: 0 !important;
+    }
+
+    /* Global scroll lock only when unlocked (Inner Scroll Mode) */
+    html.gdc-unlocked-html {
+        overflow: hidden !important;
+    }
+
+    /* Common Card Styles */
+    #gdc-block-wrapper #gateCard {
+        background: #161B22;
+        color: #E6EDF3;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        user-select: none;
+    }
+
+    #gdc-block-wrapper #unlockBtn {
+        background-color: #5968FC;
+        color: white;
+        border: none;
+        padding: 12px 32px;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s;
+        box-shadow: 0 4px 12px rgba(89, 104, 252, 0.3);
+    }
+
+    #gdc-block-wrapper #unlockBtn:hover {
+        background-color: #4c59d4;
+        transform: translateY(-2px);
+    }
+
+    /* Form Container */
+    #gdc-block-wrapper #formContainer {
+        display: none;
+        margin-top: 20px;
+        text-align: left;
+    }
+
+    /* HubSpot Form Dark Theme Overrides (Common) */
+    #gdc-block-wrapper #formContainer .hs-form-field>label {
+        color: #E6EDF3 !important;
+        font-weight: 500 !important;
+    }
+
+    #gdc-block-wrapper #formContainer .hs-input {
+        background-color: #0d1117 !important;
+        border: 1px solid #30363d !important;
+        color: white !important;
+        border-radius: 6px !important;
+        padding: 10px !important;
+    }
+
+    #gdc-block-wrapper #formContainer .hs-button {
+        background-color: #5968FC !important;
+        border-color: #5968FC !important;
+        color: white !important;
+        width: 100% !important;
+        margin-top: 10px !important;
+    }
+
+    #gdc-block-wrapper #formContainer .hs-richtext {
+        color: #8b949e !important;
+    }
+
+    #gdc-block-wrapper #iframeOut {
+        border: none;
+        width: 100%;
+    }
+</style>
+
+<!-- 1-2. Base State (Default Hidden) -->
+<style>
+    /* Default Hidden State for Critical Elements */
+    #gdc-block-wrapper #gateOverlay {
+        display: none; /* Controlled by JS State Machine */
+    }
+    
+    #gdc-block-wrapper #iframeOut {
+        display: none; /* Controlled by JS State Machine */
+        border: none;
+        width: 100%;
+        overflow: hidden;
+    }
+</style>
+
+<!-- 1-3. Locked State (Common) -->
+<style>
+    /* LOCKED STATE: Shared Logic */
+    #gdc-block-wrapper:not(.gdc-unlocked) #gateOverlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        /* Fix left alignment */
+        box-sizing: border-box;
+        z-index: 9999;
+        /* display: flex controlled by JS LockedState */
+        /* Force flex layout */
+        justify-content: center;
+        align-items: flex-start;
+        padding-top: 10vh;
+
+        /* Gradient: Clear top 400px -> Semi-transparent -> Dark */
+        /* background: linear-gradient(180deg, ...); Moved to specific media queries */
+    }
+
+    /* LOCKED STATE: Common Iframe Logic */
+    #gdc-block-wrapper:not(.gdc-unlocked) #iframeOut {
+        pointer-events: none;
+        /* Disable internal scroll/interaction */
+        /* display: block controlled by JS LockedState */
+    }
+</style>
+
+<!-- 1-3. Unlocked State (Common) -->
+<style>
+    /* UNLOCKED STATE: Full Access */
+    #gdc-block-wrapper.gdc-unlocked #iframeOut {
+        height: calc(100vh - 84px);
+        min-height: 600px;
+        pointer-events: auto;
+        mask-image: none;
+        -webkit-mask-image: none;
+    }
+
+    #gdc-block-wrapper.gdc-unlocked #gateOverlay {
+        display: none;
+    }
+</style>
+
+<!-- 2. Desktop Styles -->
+<style media="(min-width: 641px)">
+    /* LOCKED STATE: Fixed height, Outer Scroll */
+    #gdc-block-wrapper:not(.gdc-unlocked) #iframeOut {
+        height: 2000px !important;
+        /* Force fixed height to enable outer scroll */
+        min-height: 2000px;
+    }
+
+    #gdc-block-wrapper:not(.gdc-unlocked) #gateOverlay {
+        height: 100%;
+        /* Cover the 2000px content */
+        background: linear-gradient(180deg,
+                rgba(11, 14, 20, 0) 0px,
+                rgba(11, 14, 20, 0) 600px,
+                rgba(11, 14, 20, 0.55) 720px,
+                rgba(11, 14, 20, 0.78) 100%);
+    }
+
+    /* UNLOCKED STATE: Full viewport height, Inner Scroll */
+    #gdc-block-wrapper.gdc-unlocked #iframeOut {
+        height: calc(100vh - 84px) !important;
+        min-height: 600px;
+        border: none;
+        width: 100%;
+        pointer-events: auto;
+        /* Enable internal scroll */
+        display: block;
+    }
+
+    #gdc-block-wrapper.gdc-unlocked #gateOverlay {
+        display: none !important;
+    }
+
+    /* Desktop Blur Effect (Pseudo-element) - Only active when locked */
+    #gdc-block-wrapper:not(.gdc-unlocked) #gateOverlay::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        pointer-events: none;
+        z-index: -1;
+
+        /* Blur Gradient Mask */
+        mask-image: linear-gradient(180deg,
+                rgba(0, 0, 0, 0) 0px,
+                rgba(0, 0, 0, 0) 600px,
+                rgba(0, 0, 0, 0.2) 720px,
+                rgba(0, 0, 0, 0.6) 850px,
+                rgba(0, 0, 0, 1) 1000px);
+        -webkit-mask-image: linear-gradient(180deg,
+                rgba(0, 0, 0, 0) 0px,
+                rgba(0, 0, 0, 0) 600px,
+                rgba(0, 0, 0, 0.2) 720px,
+                rgba(0, 0, 0, 0.6) 850px,
+                rgba(0, 0, 0, 1) 1000px);
+    }
+
+    /* Desktop Gate Content (Integrated into Overlay) */
+    #gdc-block-wrapper #gateCard {
+        /* Restore Card Styles */
+        background: radial-gradient(120% 120% at 100% 50%, rgba(125, 136, 255, 0.16) 0%, rgba(22, 27, 34, 0.98) 45%, rgba(13, 17, 23, 0.98) 100%);
+        border: 1px solid rgba(129, 142, 255, 0.55);
+        box-shadow:
+            0 26px 70px rgba(0, 0, 0, 0.6),
+            0 0 0 1px rgba(129, 142, 255, 0.18),
+            0 0 24px rgba(99, 110, 255, 0.28);
+        padding: 40px 24px;
+        border-radius: 20px;
+
+        /* Layout & Position */
+        text-align: center;
+        /* Center align text */
+        width: 600px;
+        position: relative;
+        margin-top: 650px;
+        /* Position in the blurred area */
+        display: block;
+        /* Restore block flow */
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #gdc-block-wrapper #gateCard h2 {
+        margin-top: 0;
+        margin-bottom: 16px;
+        font-size: 32px;
+        /* Larger title */
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -0.02em;
+        text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        /* Text shadow for readability */
+    }
+
+    #gdc-block-wrapper #gateCard p {
+        color: #b8c1d9;
+        /* Lighter text for contrast on dark bg */
+        margin-bottom: 32px;
+        line-height: 1.6;
+        font-size: 18px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    #gdc-block-wrapper #unlockBtn {
+        /* Enhanced Button for Overlay */
+        display: inline-block;
+        /* Ensure block/inline-block behavior */
+        padding: 16px 48px;
+        font-size: 18px;
+        box-shadow: 0 8px 24px rgba(89, 104, 252, 0.4);
+    }
+</style>
+
+<!-- 3. Mobile Styles -->
+<style media="(max-width: 640px)">
+    /* LOCKED STATE: Iframe Preview */
+    #gdc-block-wrapper:not(.gdc-unlocked) #iframeOut {
+        height: 1200px; /* Increased height for mobile */
+        /* Show limited preview */
+        min-height: 1200px;
+        /* Gradient Mask: Clear top 700px, fade out bottom 500px */
+        mask-image: linear-gradient(180deg, black 0%, black 700px, transparent 100%);
+        -webkit-mask-image: linear-gradient(180deg, black 0%, black 700px, transparent 100%);
+    }
+
+    /* LOCKED STATE: Overlay & Unlock Card */
+    #gdc-block-wrapper:not(.gdc-unlocked) #gateOverlay {
+        position: absolute;
+        top: 500px; /* Start overlap from where fade begins (Mobile: 700px) */
+        left: 0;
+        height: auto;
+        /* Allow height to grow with content */
+        min-height: 400px;
+        /* Cover the faded area */
+        flex-direction: column;
+        justify-content: flex-start;
+        /* Align to top padding */
+        align-items: center;
+        padding: 40px 20px;
+        /* Add sufficient padding */
+
+        /* Visuals: Dark gradient background for text readability */
+        background: linear-gradient(180deg, rgba(11, 14, 20, 0) 0%, rgba(11, 14, 20, 1) 20%);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto;
+        z-index: 10;
+    }
+
+    /* Remove desktop-specific blur element */
+    #gateOverlay::before {
+        display: none;
+    }
+
+    /* Reset Card Styles for Mobile Flow */
+    #gdc-block-wrapper #gateCard {
+        width: 100%;
+        max-width: none;
+        box-shadow: none !important;
+        background: transparent !important;
+        border: none !important;
+        padding: 0;
+        text-align: center;
+    }
+
+    #gdc-block-wrapper .gate-intro {
+        text-align: center;
+        margin-bottom: 24px;
+    }
+
+    #gdc-block-wrapper .gate-title {
+        font-size: 24px;
+        margin-bottom: 12px;
+    }
+</style>
+
+<!-- 3-1. Mobile Focus Mode (Hierarchy: Mobile > Locked > Focus Mode) -->
+<style media="(max-width: 640px)">
+    .fe-block-yui_3_17_2_1_1771983449294_634 {
+        grid-area: 1/1/7/11;
+    }
+
+    /* MOBILE OVERLAY MODE: Full Screen Form */
+    body.gdc-mobile-overlay-mode {
+        overflow: auto !important;
+        /* Restore scrolling on body */
+    }
+
+    body.gdc-mobile-overlay-mode #gdc-block-wrapper #iframeOut {
+        display: none !important;
+        /* Hide content to focus on form */
+    }
+
+    body.gdc-mobile-overlay-mode #gdc-block-wrapper #gateOverlay {
+        /* Standard Document Flow */
+        position: relative !important;
+        top: auto;
+        left: auto;
+        height: auto !important;
+        z-index: 2147483647;
+        /* Maximum z-index */
+
+        /* Layout */
+        display: flex !important;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+
+        padding-top: 40px;
+        padding-bottom: 80px;
+
+        /* Reset background to solid for overlay mode */
+        background: #0B0E14 !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    body.gdc-mobile-overlay-mode #gdc-block-wrapper #gateCard {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        padding: 0 16px;
+        margin: 0;
+        position: static;
+        flex-shrink: 0;
+    }
+
+    /* Compact Form Styles for Mobile */
+    body.gdc-mobile-overlay-mode .hs-form-field {
+        margin-bottom: 12px !important;
+    }
+
+    body.gdc-mobile-overlay-mode .hs-input {
+        height: 40px !important;
+        /* Reduce input height */
+        padding: 8px 12px !important;
+    }
+
+    body.gdc-mobile-overlay-mode .hs-button {
+        margin-top: 16px !important;
+        width: 100% !important;
+        padding: 12px !important;
+    }
+    
+    /* Hide main title in overlay mode to save space */
+    body.gdc-mobile-overlay-mode h2 {
+        display: none !important;
+    }
+</style>
+
+<div id="gdc-block-wrapper">
+    <iframe id="iframeOut" src="https://product.blueberry-ai.com/other/gdc/index.html?v=1"></iframe>
+    <!-- <iframe id="iframeOut" src="http://127.0.0.1:5500/gdc/index.html"></iframe> -->
+    <!-- <iframe id="iframeOut" src="https://sit-1.sharecreators.cn/other/gdc/index.html"></iframe> -->
+    <div id="gateOverlay">
+        <div id="gateCard">
+            <h2>Unlock GDC Parties 2026</h2>
+            <p>Register once to access the full, curated list of parties and events.</p>
+            <button id="unlockBtn">Unlock Now</button>
+            <div id="formContainer"></div>
+            <button id="manualCloseBtn"
+                style="display: none; background-color: #2ea44f; color: white; border: none; padding: 12px 32px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; margin-top: 20px; transition: all 0.2s;">Enter
+                Site</button>
+        </div>
+    </div>
+</div>
+
+<script charset="utf-8" type="text/javascript" src="//js.hsforms.net/forms/embed/v2.js"></script>
+<script>
+    (function () {
+        // --- CONSTANTS ---
+        var LEAD_KEY = 'gdc_lead_unlocked';
+
+        // --- DOM ELEMENTS ---
+        var els = {
+            wrapper: document.getElementById('gdc-block-wrapper'),
+            overlay: document.getElementById('gateOverlay'),
+            iframe: document.getElementById('iframeOut'),
+            unlockBtn: document.getElementById('unlockBtn'),
+            formContainer: document.getElementById('formContainer'),
+            gateCard: document.getElementById('gateCard'),
+            manualCloseBtn: document.getElementById('manualCloseBtn')
+        };
+
+        // --- STATE PATTERN IMPLEMENTATION ---
+
+        // Abstract State Class
+        function State(context) {
+            this.context = context;
+        }
+        State.prototype.enter = function () { };
+        State.prototype.exit = function () { };
+        State.prototype.handleUnlock = function () { };
+        State.prototype.handleClose = function () { };
+
+        // Concrete State: Initial (Empty)
+        function InitialState(context) {
+            State.call(this, context);
+        }
+        InitialState.prototype = Object.create(State.prototype);
+        InitialState.prototype.enter = function() {
+            // Ensure clean slate
+            els.overlay.style.display = 'none';
+            els.iframe.style.display = 'none';
+            els.wrapper.classList.remove('gdc-unlocked');
+            document.documentElement.classList.remove('gdc-unlocked-html');
+        };
+
+        // Concrete State: Locked
+        function LockedState(context) {
+            State.call(this, context);
+        }
+        LockedState.prototype = Object.create(State.prototype);
+        LockedState.prototype.enter = function () {
+            // Reset UI to locked
+            els.wrapper.classList.remove('gdc-unlocked');
+            document.documentElement.classList.remove('gdc-unlocked-html');
+            els.overlay.style.display = 'flex';
+            els.overlay.style.opacity = '1';
+            els.overlay.style.visibility = 'visible';
+            els.iframe.style.display = 'block';
+        };
+        LockedState.prototype.handleUnlock = function () {
+            // Determine next state based on viewport
+            if (window.innerWidth <= 640) {
+                this.context.transitionTo(new MobileOverlayState(this.context));
+            } else {
+                // Desktop: Stay in Locked state visually but show form
+                // In a fuller implementation, this could be a 'FormFillingState'
+                this.context.loadForm();
+            }
+        };
+
+        // Concrete State: Mobile Overlay (Focus Mode)
+        function MobileOverlayState(context) {
+            State.call(this, context);
+        }
+        MobileOverlayState.prototype = Object.create(State.prototype);
+        MobileOverlayState.prototype.enter = function () {
+            document.body.classList.add('gdc-mobile-overlay-mode');
+            var introText = els.gateCard.querySelector('p');
+            if (introText) introText.style.display = 'none';
+            this.context.loadForm();
+        };
+        MobileOverlayState.prototype.exit = function () {
+            document.body.classList.remove('gdc-mobile-overlay-mode');
+        };
+        MobileOverlayState.prototype.handleClose = function () {
+            // When closing from mobile overlay (after success), go to Unlocked
+            this.context.transitionTo(new UnlockedState(this.context));
+        };
+
+        // Concrete State: Unlocked
+        function UnlockedState(context) {
+            State.call(this, context);
+        }
+        UnlockedState.prototype = Object.create(State.prototype);
+        UnlockedState.prototype.enter = function (isInit) {
+            els.wrapper.classList.add('gdc-unlocked');
+            document.documentElement.classList.add('gdc-unlocked-html');
+            els.iframe.style.display = 'block';
+
+            // Scroll to top when unlocking (not on initial load)
+            if (!isInit) {
+                window.scrollTo({ top: 0 });
+            }
+
+            if (isInit) {
+                els.overlay.style.display = 'none';
+            } else {
+                els.overlay.style.opacity = '0';
+                els.overlay.style.visibility = 'hidden';
+                setTimeout(function () {
+                    els.overlay.style.display = 'none';
+                }, 500);
+            }
+        };
+
+        // Context (State Machine)
+        var AppContext = {
+            currentState: null,
+
+            init: function () {
+                // Start in Initial state (Clean Slate)
+                this.transitionTo(new InitialState(this));
+
+                // Then Determine Logic
+                var isUnlocked = localStorage.getItem(LEAD_KEY) === 'true';
+                if (isUnlocked) {
+                    this.transitionTo(new UnlockedState(this), true);
+                } else {
+                    this.transitionTo(new LockedState(this));
+                }
+                this.bindEvents();
+            },
+
+            transitionTo: function (newState, params) {
+                if (this.currentState) {
+                    this.currentState.exit();
+                }
+                this.currentState = newState;
+                this.currentState.enter(params);
+            },
+
+            bindEvents: function () {
+                var self = this;
+                els.unlockBtn.addEventListener('click', function () {
+                    if (self.currentState && self.currentState.handleUnlock) {
+                        self.currentState.handleUnlock();
+                    }
+                });
+                els.manualCloseBtn.addEventListener('click', function () {
+                    // Manual close typically leads to Unlocked state
+                    // If in MobileOverlay, it transitions to Unlocked
+                    // If in Desktop (Locked showing form), it transitions to Unlocked
+                    self.transitionTo(new UnlockedState(self));
+                });
+            },
+
+            loadForm: function () {
+                // UI Loading State
+                els.unlockBtn.innerText = 'Loading...';
+                els.unlockBtn.style.opacity = '0.7';
+                els.unlockBtn.style.cursor = 'wait';
+
+                // Load HubSpot Form
+                if (typeof hbspt !== 'undefined') {
+                    hbspt.forms.create({
+                        portalId: "44361574",
+                        formId: "08b780cb-4898-467f-9314-ca19e75cf03e",
+                        target: "#formContainer",
+                        onFormReady: function ($form) {
+                            els.unlockBtn.style.display = 'none';
+                            var intro = els.gateCard.querySelector('p');
+                            if (intro) intro.style.display = 'none';
+                            els.formContainer.style.display = 'block';
+                        },
+                        onFormSubmit: function ($form) {
+                            DataCollector.collect($form);
+                        },
+                        onFormSubmitted: function () {
+                            // Success!
+                            localStorage.setItem(LEAD_KEY, 'true');
+                            els.manualCloseBtn.style.display = 'block';
+                        }
+                    });
+                } else {
+                    console.error("HubSpot script not loaded");
+                }
+            }
+        };
+
+        // --- DATA COLLECTION SERVICE ---
+        var DataCollector = {
+            collect: async function ($form) {
+                var getVal = function (name) {
+                    var input;
+                    if ($form.querySelector) {
+                        input = $form.querySelector("input[name='" + name + "']");
+                    } else if ($form.find) {
+                        input = $form.find("input[name='" + name + "']")[0];
+                    }
+                    return input ? input.value : "";
+                };
+
+                var firstName = getVal("firstname");
+                var lastName = getVal("lastname");
+                var company = getVal("0-2/name");
+
+                if (!company && $form.querySelector) {
+                    var specialInput = $form.querySelector("input[name='0-2/name']");
+                    company = specialInput ? specialInput.value : "";
+                }
+
+                var formData = {
+                    user_name: (firstName + " " + lastName).trim(),
+                    company_name: company,
+                    user_phone: getVal("phone"),
+                    wechat: "",
+                    industry: "",
+                    user_email: getVal("email"),
+                    message: "GDC 2026 List Unlock",
+                    SQF_CHANNEL: "2026-gdc",
+                    distribution_channel: 'gdc'
+                };
+
+                // var serverUrl = "https://sit-1.sharecreators.cn/api/marketing/activity/trialInfoCollect";
+                var serverUrl = "https://product.blueberry-ai.com/api/marketing/activity/trialInfoCollect";
+
+                try {
+                    await fetch(serverUrl, {
+                        method: "POST",
+                        headers: {
+                            "Accept": "application/json",
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                } catch (err) {
+                    console.error("Data collection error:", err);
+                }
+            }
+        };
+
+        // --- INITIALIZE ---
+        AppContext.init();
+    })();
+</script>

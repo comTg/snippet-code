@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    :root {
+      --default-font-color-hover: #165DFF;
+    }
+    .hwork-app-main-wrapper-loading {
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: nowrap
+    }
+
+    .hwork-app-main-wrapper-loading-text {
+        color: #86909c;
+        margin: 16px 0 0
+    }
+
+    .hwork-app-main-wrapper-loading-container {
+        position: relative;
+        width: 60px;
+        height: 60px;
+        margin: 0 auto
+    }
+
+    .hwork-app-main-wrapper-loading-container-content {
+        width: 50px;
+        height: 50px;
+        margin: auto;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0
+    }
+
+    .hwork-app-main-wrapper-loading-container-content:before {
+        content: "";
+        width: 50px;
+        height: 6px;
+        background: #000;
+        opacity: .1;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        border-radius: 50%;
+        animation: shadow-hr-loading .5s linear infinite
+    }
+
+    .hwork-app-main-wrapper-loading-container-content:after {
+        content: "";
+        width: 50px;
+        height: 50px;
+        background: var(--default-font-color-hover);
+        animation: animate-hr-loading .5s linear infinite;
+        position: absolute;
+        top: 0;
+        left: 0;
+        border-radius: 10px
+    }
+
+    @keyframes animate-hr-loading {
+        17% {
+            border-bottom-right-radius: 3px
+        }
+
+        25% {
+            transform: translateY(9px) rotate(22.5deg)
+        }
+
+        50% {
+            transform: translateY(18px) scaleY(.9) rotate(45deg);
+            border-bottom-right-radius: 30px
+        }
+
+        75% {
+            transform: translateY(9px) rotate(67.5deg)
+        }
+
+        to {
+            transform: translateY(0) rotate(90deg)
+        }
+    }
+
+    @keyframes shadow-hr-loading {
+        0%,to {
+            transform: scale(1)
+        }
+
+        50% {
+            transform: scaleX(1.2)
+        }
+    }
+  </style>
+</head>
+<body>
+  <div class="hwork-app-main-wrapper-loading">
+    <div class="hwork-app-main-wrapper-loading-container">
+      <div class="hwork-app-main-wrapper-loading-container-content"></div>
+    </div>
+    <div class="hwork-app-main-wrapper-loading-text">努力加载中...</div>
+  </div>
+</body>
+</html>
